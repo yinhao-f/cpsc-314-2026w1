@@ -20,6 +20,7 @@ const {
 const orbPosition = { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) };
 // TODO: Create uniform variable for the radius of the orb and pass it into the shaders,
 // you will need them in the latter part of the assignment
+const orbRadius = { type: 'float', value: 1.0 };
 
 // Materials: specifying uniforms and shaders
 // Diffuse texture map (this defines the main colors of the boxing glove)
@@ -29,7 +30,8 @@ const boxingGloveMaterial = new THREE.MeshStandardMaterial({
 });
 const armadilloMaterial = new THREE.ShaderMaterial({
   uniforms: {
-    orbPosition: orbPosition
+    orbPosition: orbPosition,
+    orbRadius: orbRadius
   }
 });
 const sphereMaterial = new THREE.ShaderMaterial({
@@ -88,7 +90,7 @@ loadAndPlaceOBJ('obj/boxing_glove.obj', boxingGloveMaterial, function (boxingGlo
 // Create the sphere geometry
 // https://threejs.org/docs/#api/en/geometries/SphereGeometry
 // TODO: Make the radius of the orb a variable
-const sphereGeometry = new THREE.SphereGeometry(1.0, 32.0, 32.0);
+const sphereGeometry = new THREE.SphereGeometry(orbRadius.value, 32.0, 32.0);
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 sphere.position.set(0.0, 1.0, 0.0);
 sphere.parent = worldFrame;
