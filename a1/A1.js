@@ -63,7 +63,24 @@ loadAndPlaceOBJ('obj/armadillo.obj', armadilloMaterial, function (armadillo) {
 
 // TODO: Add the boxing glove to the scene on top of the Armadillo similar to how the Armadillo
 // is added to the scene
+loadAndPlaceOBJ('obj/boxing_glove.obj', boxingGloveMaterial, function (boxingGlove) {
+  boxingGlove.position.set(-5.2, 12.7, -5.1);
+  boxingGlove.rotation.x = 0.4 * Math.PI;
+  boxingGlove.rotation.z = 0.6 * Math.PI;
+  boxingGlove.scale.set(-1.2, 1.2, 1.2);
+  boxingGlove.parent = worldFrame;
+  scene.add(boxingGlove);
+});
 
+// Left glove
+loadAndPlaceOBJ('obj/boxing_glove.obj', boxingGloveMaterial, function (boxingGlove) {
+  boxingGlove.position.set(5.2, 12.2, -4.2);
+  boxingGlove.rotation.x = 0.4 * Math.PI;
+  boxingGlove.rotation.z = -0.6 * Math.PI;
+  boxingGlove.scale.set(1.2, 1.2, 1.2);
+  boxingGlove.parent = worldFrame;
+  scene.add(boxingGlove);
+});
 
 // Create the sphere geometry
 // https://threejs.org/docs/#api/en/geometries/SphereGeometry
