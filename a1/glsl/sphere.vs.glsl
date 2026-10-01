@@ -8,6 +8,7 @@ void main() {
     // and finally the projection matrix to get final vertex position.
 
     // TODO: Make changes here to make the orb move as the light source
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    vec3 sumPosition = orbPosition + position;
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(sumPosition, 1.0);
 
 }

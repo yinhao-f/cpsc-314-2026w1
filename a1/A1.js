@@ -71,7 +71,6 @@ loadAndPlaceOBJ('obj/boxing_glove.obj', boxingGloveMaterial, function (boxingGlo
   boxingGlove.parent = worldFrame;
   scene.add(boxingGlove);
 });
-
 // Left glove
 loadAndPlaceOBJ('obj/boxing_glove.obj', boxingGloveMaterial, function (boxingGlove) {
   boxingGlove.position.set(5.2, 12.2, -4.2);
