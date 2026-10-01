@@ -7,7 +7,11 @@ out float intensity;
 
 void main() {
 
-    intensity = 0.0; // TODO: REPLACE ME
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vec3 lightDirection = normalize(orbPosition - worldPos.xyz);
+    vec3 worldNormal = normalize(normalMatrix * normal);
+    intensity = dot(worldNormal, lightDirection); // TODO: REPLACE ME
+
 
     // TODO: Make changes here for part b, c, d
   	// HINT: INTENSITY IS CALCULATED BY TAKING THE DOT PRODUCT OF THE NORMAL AND LIGHT DIRECTION VECTORS\

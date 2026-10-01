@@ -27,7 +27,11 @@ const gloveColorMap = new THREE.TextureLoader().load('images/boxing_gloves_textu
 const boxingGloveMaterial = new THREE.MeshStandardMaterial({
   map: gloveColorMap,
 });
-const armadilloMaterial = new THREE.ShaderMaterial();
+const armadilloMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    orbPosition: orbPosition
+  }
+});
 const sphereMaterial = new THREE.ShaderMaterial({
   uniforms: {
     orbPosition: orbPosition
