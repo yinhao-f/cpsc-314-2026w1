@@ -92,6 +92,20 @@ function setup() {
 
 async function loadGLTFAsync(files, postLoading) {
     //TODO: implement this function to load the GLB model
+    const manager = new THREE.LoadingManager();
+    manager.onProgress = function (item, loaded, total) {
+        console.log("loading manager log: ", item, loaded, total);
+    };
+
+    const onProgress = function (xhr) {
+        if (xhr.lengthComputable) {
+            const percentComplete = xhr.loaded / xhr.total * 100.0;
+            console.log(Math.round(percentComplete, 2) + '% downloaded');
+        }
+    };
+    const loader = new GLTFLoader(manager);
+    let models = await Promise.all(files.map(file => loader.loadAsync(file, onProgress)));
+    postLoading(models);
 }
 
 async function loadOBJAsync(files, postLoading) {

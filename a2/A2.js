@@ -78,6 +78,15 @@ new SourceLoader().load(shaderFiles, function (shaders) {
 // TODO: Load and place the Armadillo's geometry in GLB format.
 //       First, fill in the loadGLTFAsync() function in js/setup.js.
 //       Then, call loadGLTFAsync() here with a post-loading callback.
+loadGLTFAsync(['glb/armadillo.glb'], (models) => {
+    models.forEach(gltf => {
+	const model = gltf.scene;
+	model.position.set(0.0, 5.3, -8.0);
+	model.scale.set(0.1, 0.1, 0.1);
+	model.rotation.y = Math.PI;
+	scene.add(model);
+    });
+});
 //
 // TODO: Load the boxing gloves (obj/boxing_glove.obj) using loadOBJAsync().
 //       Attach them to the appropriate wrist bones of the armadillo.
