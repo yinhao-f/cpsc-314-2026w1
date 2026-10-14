@@ -78,6 +78,9 @@ new SourceLoader().load(shaderFiles, function (shaders) {
 // TODO: Load and place the Armadillo's geometry in GLB format.
 //       First, fill in the loadGLTFAsync() function in js/setup.js.
 //       Then, call loadGLTFAsync() here with a post-loading callback.
+let forearmL = null;
+let forearmR = null;
+
 loadGLTFAsync(['glb/armadillo.glb'], (models) => {
     models.forEach(gltf => {
 	const model = gltf.scene;
@@ -85,6 +88,60 @@ loadGLTFAsync(['glb/armadillo.glb'], (models) => {
 	model.scale.set(0.1, 0.1, 0.1);
 	model.rotation.y = Math.PI;
 	scene.add(model);
+
+	// Part B
+	let wristL = null;
+	let wristR = null;
+
+	model.traverse((child) => {
+	    if (child.isSkinnedMesh && child.skeleton) {
+		child.skeleton.bones.forEach((bone) => {
+		    switch (bone.name) {
+			case 'Forearm_L':
+			    forearmL = bone;
+			    break;
+			case 'Forearm_R':
+			    forearmR = bone;
+			    break;
+			case 'Wrist_L':
+			    wristL = bone;
+			    break;
+			case 'Wrist_R':
+			    wristR = bone;
+			    break;
+		    }
+		});
+	    }
+	});
+
+	loadOBJAsync(['obj/boxing_glove.obj'], (gloves) => {
+	    const gloveTemplate = gloves[0];
+
+	    const gloveL = gloveTemplate.clone();
+	    gloveL.traverse((child) => {
+		if (child.isMesh) {
+		    child.material = boxingGloveMaterial;
+		}
+	    });
+
+	    const gloveR = gloveTemplate.clone();
+	    gloveR.traverse((child) => {
+		if (child.isMesh) {
+		    child.material = boxingGloveMaterial;
+		}
+	    });
+	    
+	    // X: turn wrist, Y: swivel hand, Z: nod hand
+	    gloveL.position.set(0.3, 0.0, -0.2);
+	    gloveL.rotation.set(Math.PI * -0.1, Math.PI * -0.4, Math.PI * 0.37);
+	    gloveL.scale.set(-1.2, -1.2, 1.2);
+	    wristL.add(gloveL);
+
+	    gloveR.position.set(0.3, 0.3, -0.2);
+	    gloveR.rotation.set(Math.PI * 0.1, Math.PI * -0.7, Math.PI * 0.3);
+	    gloveR.scale.set(-1.2, -1.2, -1.2);
+	    wristR.add(gloveR);
+	});
     });
 });
 //
@@ -189,6 +246,21 @@ function update() {
 
   // TODO: Implement armadillo hand waving animation (Part b).
   // HINT: Modify the rotation of the forearm bones using a periodic function.
+  if (forearmL && forearmR) {
+      const armadilloPos = new THREE.Vector3(0.0, 5.3, -8.0);
+      const spherePos = sphere.position;
+      const distance = armadilloPos.distanceTo(spherePos);
+
+      const proximity = THREE.MathUtils.clamp(1.0 - distance / waveDistance, 0.0, 1.0);
+
+      const waveFreq = waveFreqBase + proximity * 3.0;
+
+      const t = clock.getElapsedTime();
+      const waveAngle = Math.sin(t*waveFreq*2.0*Math.PI)*0.5;
+
+      forearmL.rotation.x = waveAngle;
+      forearmR.rotation.x = -waveAngle;
+  }
 
   // Requests the next update call, this creates a loop
   requestAnimationFrame(update);
