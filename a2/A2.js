@@ -89,7 +89,6 @@ loadGLTFAsync(['glb/armadillo.glb'], (models) => {
 	model.rotation.y = Math.PI;
 	scene.add(model);
 
-	// Part B
 	let wristL = null;
 	let wristR = null;
 
@@ -162,6 +161,10 @@ const sphereMaterial = new THREE.MeshStandardMaterial({
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 scene.add(sphere);
 
+const sphereInitialScale = 1.0;
+const sphereInitialColor = sphereMaterial.emissive.clone();
+const sphereHitColor = new THREE.Color(0xff0000);
+
 const sphereLight = new THREE.PointLight(0xffffff, 50.0, 100);
 scene.add(sphereLight);
 
@@ -174,7 +177,7 @@ const eyeGeometry = new THREE.SphereGeometry(1.0, 32, 32);
 const eyeScale = 0.5;
 
 const leftEyeSocket = new THREE.Object3D();
-const leftEyeSocketPos = new THREE.Vector3(0, 4.0, 0);  // TODO: Adjust position to place on armadillo's face
+const leftEyeSocketPos = new THREE.Vector3(0.7, 12.0, -4.8);  // TODO: Adjust position to place on armadillo's face
 leftEyeSocket.position.copy(leftEyeSocketPos);
 
 const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
@@ -186,6 +189,16 @@ scene.add(leftEyeSocket);
 // TODO: Create the right eye similarly and add it to the scene.
 // --------------------------------------------------------------------------------------------
 
+const rightEyeSocket = new THREE.Object3D();
+const rightEyeSocketPos = new THREE.Vector3(-0.7, 12.0, -4.8);
+rightEyeSocket.position.copy(rightEyeSocketPos);
+
+const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+rightEye.scale.copy(new THREE.Vector3(eyeScale, eyeScale, eyeScale));
+rightEyeSocket.add(rightEye);
+
+scene.add(rightEyeSocket);
+
 
 // PART D -------------------------------------------------------------------------------------
 // Make the eyes look at the sphere
@@ -193,6 +206,10 @@ scene.add(leftEyeSocket);
 // TODO: Create a function to update eye orientations so they look at the sphere.
 // HINT: THREE.Object3D has a lookAt() method.
 // --------------------------------------------------------------------------------------------
+function updateEyeOrientations() {
+    leftEyeSocket.lookAt(sphere.position);
+    rightEyeSocket.lookAt(sphere.position);
+}
 
 
 // PART E -------------------------------------------------------------------------------------
@@ -201,6 +218,47 @@ scene.add(leftEyeSocket);
 // TODO: Create laser geometry and meshes. Attach them to the eyes.
 // HINT: THREE.CylinderGeometry can be used for the laser beam shape.
 // --------------------------------------------------------------------------------------------
+const laserMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+
+const laserGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1.0, 8);
+const leftLaser = new THREE.Mesh(laserGeometry, laserMaterial);
+const rightLaser = new THREE.Mesh(laserGeometry, laserMaterial);
+
+scene.add(leftLaser);
+scene.add(rightLaser);
+
+leftLaser.visible = false;
+rightLaser.visible = false;
+
+function updateLasers() {
+    scene.updateMatrixWorld(true);
+
+    const leftEyePos = new THREE.Vector3();
+    const rightEyePos = new THREE.Vector3();
+    const spherePos = new THREE.Vector3();
+
+    leftEyeSocket.getWorldPosition(leftEyePos);
+    rightEyeSocket.getWorldPosition(rightEyePos);
+    sphere.getWorldPosition(spherePos);
+
+    const up = new THREE.Vector3(0, 1, 0);
+
+    function aimLaser(laser, origin) {
+	const direction = new THREE.Vector3().subVectors(spherePos, origin);
+	const distance = direction.length();
+
+	laser.visible = distance < LaserDistance;
+	laser.position.copy(origin).add(spherePos).multiplyScalar(0.5);
+
+	laser.quaternion.setFromUnitVectors(up, direction.normalize());
+
+	laser.scale.set(1, distance, 1);
+    }
+
+    aimLaser(leftLaser, leftEyePos);
+    aimLaser(rightLaser, rightEyePos);
+
+}
 
 
 // Listen to keyboard events.
@@ -237,6 +295,25 @@ function checkKeyboard() {
   // Move the sphere light in the scene. This allows the floor to reflect the light as it moves.
   sphereLight.position.set(sphereOffset.value.x, sphereOffset.value.y, sphereOffset.value.z);
   sphere.position.set(sphereOffset.value.x, sphereOffset.value.y, sphereOffset.value.z);
+
+  updateEyeOrientations();
+  updateLasers();
+
+    const deltaTime = clock.getDelta();
+    const isHit = leftLaser.visible || rightLaser.visible;
+
+    if (isHit) {
+	const newScale = Math.min(sphere.scale.x + sphereGrowSpeed * deltaTime, sphereMaxSize);
+	sphere.scale.setScalar(newScale);
+
+	sphereMaterial.emissive.lerp(sphereHitColor, Math.min(colorSpeed * deltaTime, 1.0));
+    } else {
+	const newScale = Math.max(sphere.scale.x - sphereGrowSpeed * deltaTime, sphereInitialScale);
+	sphere.scale.setScalar(newScale);
+
+	sphereMaterial.emissive.lerp(sphereInitialColor, Math.min(colorSpeed * deltaTime, 1.0));
+    }
+    
 }
 
 
